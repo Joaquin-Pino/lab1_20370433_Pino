@@ -6,6 +6,7 @@
 ; crea representacion de un usuario
 ; dominio: int, str
 ; recorrido: ususario
+(provide crear-usuario)
 (define (crear-usuario id nombre)(list id nombre 0 #f))
 
 ;selectores
