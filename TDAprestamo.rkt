@@ -1,15 +1,16 @@
 #lang racket
 
 (require "utilidades.rkt")
+(require "TDAdia.rkt")
 
-;definicion de prestamo
+;-----------------------------definicion-----------------------------
 ; crea tipo de dato prestamo
 ; dominio: int, int, int, str, int
 ; recorrido: prestamo
 (define (crear-prestamo id id-usuario id-libro fecha-prestamo dias-solicitados)
   (list id id-usuario id-libro fecha-prestamo dias-solicitados))
 
-;selectores
+;-----------------------------selectores-----------------------------
 ; obtiene id de prestamo
 ; domino: pestamo
 ; recorrido: int
@@ -35,7 +36,7 @@
 ; recorrido: int
 (define (duracion-prestamo prestamo) (obtener-dato prestamo 4))
 
-;falta obtener fecha vencimiento, no se si ponerlo en tda biblioteca o aca
+
 
 ;pertenencia
 ; verifica si tipo de dato es de tipo de dato prestamo
@@ -48,4 +49,17 @@
        (string? (fecha-prestamo p))
        (number? (duracion-prestamo p))
        (= (length p) 5)))
+
+
+;;----------------------------- otro ------------------------------
+(define (obtener-fecha-vencimiento prestamo)
+  (let ((fecha-prest (leer-fecha (fecha-prestamo prestamo)))
+        (dias-prestado (duracion-prestamo prestamo)))
+    (fecha->string(sumar-dias fecha-prest dias-prestado))
+    ))
+
+
+;------------------------------ pruebas
+(define p1 (crear-prestamo 01 01 01 "28/01" 5)) 
+(obtener-fecha-vencimiento p1)
 

@@ -3,17 +3,18 @@
 (require "utilidades.rkt")
 (require "TDAlibro.rkt")
 (require "TDAusuario.rkt")
+(require "TDAdia.rkt")
 
-; definicion
+; -----------------------------definicion-----------------------------
 (define (crear-biblioteca libros usuarios prestamos max-libros dias-max
                           tasa-multa limite-deuda dias-retraso fecha-inicial ) ;RF05
   (list libros usuarios prestamos max-libros dias-max
         tasa-multa limite-deuda dias-retraso fecha-inicial  ))
 
-;selectores
+;-----------------------------selectores-----------------------------
 (define (libros-en-biblioteca biblioteca) (obtener-dato biblioteca 0))
 (define (usuarios-biblioteca biblioteca) (obtener-dato biblioteca 1))
-(define (obtener-prestamos biblioteca) (obtener-dato biblioteca 2))
+(define (obtener-prestamos biblioteca) (obtener-dato biblioteca 2)) ;historial de prestamos
 (define (obtener-max-libros biblioteca) (obtener-dato biblioteca 3))
 (define (obtener-max-dias-prestamo biblioteca) (obtener-dato biblioteca 4))
 (define (obtener-tasa-multa biblioteca) (obtener-dato biblioteca 5))
@@ -21,7 +22,6 @@
 (define (obtener-biblioteca-dias-retraso biblioteca) (obtener-dato biblioteca 7))
 (define (get-fecha biblioteca) (obtener-dato biblioteca 8))
 
-(define (get-historial-prestamos biblioteca) (obtener-dato biblioteca 9))
 
 (define (usuario-presente? lista-usr id-usr)
   (cond
@@ -51,7 +51,7 @@
          (aux (cdr lst)))))
     (aux lst-usrs)))
       
-;modificadores
+;-----------------------------modificadores-----------------------------
 ; ya no se rompe con el paradigma funcional
 (define (agregar-libro biblioteca libro) ;RF06
   (if (not (libro-en-biblioteca? biblioteca libro))
@@ -86,7 +86,7 @@
                             (get-fecha biblioteca)
                             )))))
 
-;pertenencia 
+;-----------------------------pertenencia----------------------------- 
 (define (biblioteca? bib)
   (and (list? (libros-en-biblioteca bib))
        (list? (usuarios-biblioteca bib))
@@ -108,6 +108,17 @@
       )
     )
   )
+
+;----------------------------- otros -----------------------------
+(define (calcular-dias-retraso fecha-vencimiento fecha-actual)
+  (let ((vencimiento (leer-fecha fecha-vencimiento))
+        (actual (leer-fecha fecha-actual)))
+
+    (if (<= (diferencia-dias actual vencimiento) 0)
+        0
+        (diferencia-dias actual vencimiento)
+        )
+    ))
 
 ;pruebas
 ;---------------------------------------------------------------------------------
@@ -135,3 +146,6 @@
 
 (define test (obtener-usuario b6 01))
 (display test) (newline)
+
+
+(calcular-dias-retraso "04/01" "06/01" )

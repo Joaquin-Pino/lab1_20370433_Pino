@@ -2,14 +2,14 @@
 
 (require "utilidades.rkt")
 
-;DEFINICION DE USUARIO
+;-----------------------------DEFINICION DE USUARIO-----------------------------
 ; crea representacion de un usuario
 ; dominio: int, str
 ; recorrido: ususario
 (provide crear-usuario)
 (define (crear-usuario id nombre)(list id nombre 0 #f))
 
-;selectores
+;-----------------------------selectores-----------------------------
 ; obtiene id de un usuario
 ; dominio: usuario
 ; recorrido: int
@@ -31,10 +31,10 @@
 ; recorrido: int
 (define (obtener-deuda usuario) (obtener-dato usuario 2)) ;RF14
 
-;modificadores
+;-----------------------------modificadores-----------------------------
 ; 
 
-;pertenencia
+;-----------------------------pertenencia-----------------------------
 ; determina si dato es del tipo usuario
 ; dominio: cualquier tipo de dato
 ; recorrido: bool

@@ -2,14 +2,14 @@
 
 (require "utilidades.rkt")
 
-; definicion
+; -----------------------------definicion-----------------------------
 ; crea la representacion de un libro
 ; dominino: int, str, str
 ; recorrido: libro
 (provide crear-libro)
 (define (crear-libro id titulo autor) (list id (string-downcase titulo) (string-downcase autor)))
 
-;selectores
+;-----------------------------selectores-----------------------------
 ; obtiene id de un libro
 ; dominio: libro
 ; recorrido: int
@@ -26,7 +26,7 @@
 ; recorrido: str
 (define (get-libro-autor libro) (obtener-dato libro 2))
 
-;pertenencia
+;-----------------------------pertenencia-----------------------------
 ; valida que dato prestenence a la estructura indicada
 ; dominio: cualquier tipo de dato
 ; recorrido: bool

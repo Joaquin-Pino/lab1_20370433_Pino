@@ -33,5 +33,3 @@
     ((null? lista) (cons elemento lista))
     (else (cons (car lista) (agregar-final-lista elemento (cdr lista)))))
     )
-
-  
