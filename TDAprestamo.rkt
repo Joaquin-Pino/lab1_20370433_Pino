@@ -7,38 +7,48 @@
 ; crea tipo de dato prestamo
 ; dominio: int, int, int, str, int
 ; recorrido: prestamo
+(provide crear-prestamo)
 (define (crear-prestamo id id-usuario id-libro fecha-prestamo dias-solicitados)
-  (list id id-usuario id-libro fecha-prestamo dias-solicitados))
+  (list id id-usuario id-libro fecha-prestamo dias-solicitados #t)); bool->activo?
 
 ;-----------------------------selectores-----------------------------
 ; obtiene id de prestamo
 ; domino: pestamo
 ; recorrido: int
+(provide id-prestamo)
 (define (id-prestamo prestamo) (obtener-dato prestamo 0))
 
 ; obtiene id de usuario que realizo el prestamo
 ; domino: pestamo
 ; recorrido: int
+(provide id-usuario-prestamo)
 (define (id-usuario-prestamo prestamo) (obtener-dato prestamo 1))
 
 ; obtiene id del libro prestado
 ; domino: pestamo
 ; recorrido: int
+(provide id-libro-prestado)
 (define (id-libro-prestado prestamo) (obtener-dato prestamo 2))
 
 ; obtiene fecha del prestamo
 ; domino: pestamo
 ; recorrido: fecha
+(provide fecha-prestamo)
 (define (fecha-prestamo prestamo) (obtener-dato prestamo 3))
 
 ; obtiene duracion del prestamo
 ; domino: pestamo
 ; recorrido: int
+(provide duracion-prestamo)
 (define (duracion-prestamo prestamo) (obtener-dato prestamo 4))
 
+; obtiene estado del prestamo
+; domino: pestamo
+; recorrido: bool
+(provide get-estado-prestamo)
+(define (get-estado-prestamo prestamo) (obtener-dato prestamo 5))
 
-
-;pertenencia
+;-----------------------------pertenencia-----------------------------
 ; verifica si tipo de dato es de tipo de dato prestamo
 ; dominio: cualquier tipo de dato
 ; recorrido: bool
@@ -52,6 +62,8 @@
 
 
 ;;----------------------------- otro ------------------------------
+;calcula la fecha de vencimiento
+(provide obtener-fecha-vencimiento)
 (define (obtener-fecha-vencimiento prestamo)
   (let ((fecha-prest (leer-fecha (fecha-prestamo prestamo)))
         (dias-prestado (duracion-prestamo prestamo)))

@@ -19,13 +19,16 @@
 ; obtiene titulo de un libro
 ; dominio: libro
 ; recorrido: str
+(provide get-libro-titulo)
 (define (get-libro-titulo libro)  (obtener-dato libro 1))
 
 ; obtiene titulo de un libro
 ; dominio: libro
 ; recorrido: str
+(provide get-libro-autor)
 (define (get-libro-autor libro) (obtener-dato libro 2))
 
+ 
 ;-----------------------------pertenencia-----------------------------
 ; valida que dato prestenence a la estructura indicada
 ; dominio: cualquier tipo de dato

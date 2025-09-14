@@ -4,31 +4,78 @@
 (require "TDAlibro.rkt")
 (require "TDAusuario.rkt")
 (require "TDAdia.rkt")
+(require "TDAprestamo.rkt")
 
 ; -----------------------------definicion-----------------------------
+;crea una biblioteca
+; dominio: libro, usuario, prestamo, int, int, int, int, int, string
+; recorrido: biblioteca
 (define (crear-biblioteca libros usuarios prestamos max-libros dias-max
                           tasa-multa limite-deuda dias-retraso fecha-inicial ) ;RF05
   (list libros usuarios prestamos max-libros dias-max
         tasa-multa limite-deuda dias-retraso fecha-inicial  ))
 
 ;-----------------------------selectores-----------------------------
+;obtiene libros en la biblioteca, entrega una lista
+; dominio: biblioteca
+; recorrido: lista libros
 (define (libros-en-biblioteca biblioteca) (obtener-dato biblioteca 0))
+
+;obtiene usuarios en la biblioteca, entrega lista
+; dominio: biblioteca
+; recorrido: lista usarios
 (define (usuarios-biblioteca biblioteca) (obtener-dato biblioteca 1))
+
+;obtiene prestamos (historial) en la biblioteca, entrega lista
+; dominio: biblioteca
+; recorrido: lista prestamos
 (define (obtener-prestamos biblioteca) (obtener-dato biblioteca 2)) ;historial de prestamos
+
+;obtiene cantidad maxima de libros que puede tener un usuario
+;dominio: biblioteca
+;recorrido: int
 (define (obtener-max-libros biblioteca) (obtener-dato biblioteca 3))
+
+;obtiene duracion maxima de un prestamo
+;dominio: biblioteca
+;recorrido: int
 (define (obtener-max-dias-prestamo biblioteca) (obtener-dato biblioteca 4))
+
+;obtiene tasa de multa por atraso
+;dominio: biblioteca
+;recorrido: int
 (define (obtener-tasa-multa biblioteca) (obtener-dato biblioteca 5))
+
+;obtiene limite de deuda de la biblioteca
+;dominio: biblioteca
+;recorrido: int
 (define (obtener-limite-deuda biblioteca) (obtener-dato biblioteca 6))
+
+;obtiene dias de retraso maximo antes de suspension de usuario
+;dominio: biblioteca
+;recorrido: int
 (define (obtener-biblioteca-dias-retraso biblioteca) (obtener-dato biblioteca 7))
+
+;;obtiene la fecha actual de la biblioteca
+;dominio: biblioteca
+;recorrido: string
 (define (get-fecha biblioteca) (obtener-dato biblioteca 8))
 
+;verifica si esta prestente un usuario en la biblioteca
+;dominio: biblioteca, int
+;recorrido: bool
+(define (usuario-presente? biblioteca id-usr)
+  (let ((lista-usr (usuarios-biblioteca biblioteca))) 
+    (define (aux lista)
+      (cond 
+        ((null? lista) #f)
+        ((= (id-usuario (car lista)) id-usr) #t)
+        (else (aux (cdr lista)))))     
+    (aux lista-usr)))
 
-(define (usuario-presente? lista-usr id-usr)
-  (cond
-    ((null? lista-usr) #f)
-    ((= (id-usuario (car lista-usr)) id-usr) #t)
-    (else (usuario-presente? (cdr lista-usr) id-usr))))
-
+;verifica que libro este presnete en la biblioteca 
+;dominio: biblioteca, int
+;recorrido: bool
 (define (libro-en-biblioteca? biblioteca libro)
   (let ((lista-libros (libros-en-biblioteca biblioteca))
         (id-libro-ingresar (get-libro-id libro)))
@@ -39,9 +86,13 @@
         (else (buscar-id (cdr lista-lib)))))
     (buscar-id lista-libros)))
 
-;obtener usuario RF08
-;ahora esta funcion cumple con el paradigma funcional
+
+
+;obtiene usuario de la bibliioteca, retorna null si no se encuentra
+;dominio: biblioteca, int
+;recorrido: usuario, null
 (define (obtener-usuario biblioteca id)
+  ;obtener usuario RF08
   (let ((lst-usrs (usuarios-biblioteca biblioteca)))
     (define (aux lst)
       (cond
@@ -52,7 +103,9 @@
     (aux lst-usrs)))
       
 ;-----------------------------modificadores-----------------------------
-; ya no se rompe con el paradigma funcional
+;agrega libro a la lista de libros de la biblioteca, si libro existe, se entrega biblioteca sin cambios
+;dominio: biblioteca, libro
+;recorrido: bibilioteca
 (define (agregar-libro biblioteca libro) ;RF06
   (if (not (libro-en-biblioteca? biblioteca libro))
       (let ((lista-libros (libros-en-biblioteca biblioteca)))
@@ -69,11 +122,15 @@
       biblioteca ;; se entrega la biblioteca sin cambios
       ))
 
-;registrar usuario RF07
-(define (registrar-usuario biblioteca usuario) 
+
+;registra usuario en la biblioteca, si existe usuario se entrega biblioteca sin cambios
+;dominio: biblioteca, usuario
+;recorrido: biblioteca
+(define (registrar-usuario biblioteca usuario)
+  ;registrar usuario RF07
   (let ((id-usr (id-usuario usuario)) 
         (lista-usuarios (usuarios-biblioteca biblioteca)))
-    (if (usuario-presente? lista-usuarios id-usr)
+    (if (usuario-presente? biblioteca id-usr)
         biblioteca; si el usuario esta presente retornamos biblioteca
         (let ((lista-con-nuevo-usuario (agregar-final-lista usuario lista-usuarios)))
           (crear-biblioteca (libros-en-biblioteca biblioteca) lista-con-nuevo-usuario
@@ -86,7 +143,10 @@
                             (get-fecha biblioteca)
                             )))))
 
-;-----------------------------pertenencia----------------------------- 
+;-----------------------------pertenencia-----------------------------
+;comprueba que tipo de dato sea perteneciente al tipo biblioteca
+;dominio: cualquier tipo de dato
+;recorrido: bool
 (define (biblioteca? bib)
   (and (list? (libros-en-biblioteca bib))
        (list? (usuarios-biblioteca bib))
@@ -95,22 +155,38 @@
        (number? (obtener-max-dias-prestamo bib)))
   )
 
-;otros
+;-----------------------------otros-----------------------------
+
+;busca libro por id, autor o titoulo, devuelve null si no se encuentra
+;dominio: biblioteca (int o string)
+;recorrido: biblioteca
 (define (buscar-libro biblio criterio valor)
   (let ((lista-libros (libros-en-biblioteca biblio)))
-    (cond
-      ((string=? criterio "id")
-       
-       )
-      ((string=? criterio "autor") (display "estamos bsucando por autor") (newline))
-      ((string=? criterio "titulo") (display "estamos busacndo por titulo") (newline))
-      (else null)
-      )
-    )
-  )
-
+    (let ((resultado
+           (cond
+             ((string=? criterio "id")
+              (filter (lambda (libro)
+                        (= (get-libro-id libro) valor))
+                      lista-libros))
+             ((string=? criterio "autor")
+              (filter (lambda (libro)
+                        (string-contains? (get-libro-autor libro) (string-downcase valor)))
+                      lista-libros))
+             ((string=? criterio "titulo")
+              (filter (lambda (libro)
+                        (string-contains? (get-libro-titulo libro) (string-downcase valor)))
+                      lista-libros))
+             (else '())))) ; no se encontro el libro
+      
+      (if (null? resultado)
+          '()
+          (car resultado)))))
+ 
 ;----------------------------- otros -----------------------------
-(define (calcular-dias-retraso fecha-vencimiento fecha-actual)
+;calcula dias de atraso, retorna 0 si no hay atraso
+; dominio: str, str
+; recorrido: int
+(define (calcular-dias-retraso fecha-actual fecha-vencimiento)
   (let ((vencimiento (leer-fecha fecha-vencimiento))
         (actual (leer-fecha fecha-actual)))
 
@@ -119,6 +195,49 @@
         (diferencia-dias actual vencimiento)
         )
     ))
+
+
+;calcula multa por dias de atraso
+;dominio: prestamo, str, str
+;recorrido: int 
+(define (calcular-multa prestamo fecha-actual tasa-multa)
+  (let ((fecha-vencimiento (obtener-fecha-vencimiento prestamo)))
+    (let ((dias-atraso (calcular-dias-retraso fecha-actual fecha-vencimiento)))
+      (*  dias-atraso tasa-multa))
+    )
+  )
+
+#|
+;(define (hay-atraso? usuario historial-prestamo))
+
+(define (debe-suspenderse? biblioteca id-usr fecha-actual)
+  (let ((usuario (obtener-usuario biblioteca id-usr))
+        (limite-max (obtener-limite-deuda biblioteca))))
+  ;; hacer otro let con el historial de prestamo del usuario y verificar si hay alugn atraso
+  )
+
+(define (suspender-usuario biblioteca id-usr)
+  (let ((usr (obtener-usuario biblioteca id-usr)))
+    (cond
+      ((usuario? usr) (if (debe-suspenderse? biblioteca id-usr (get-fecha biblioteca))
+                          ;;crear nueva biblioteca
+                          biblioteca
+
+                          )
+                      )
+      )
+
+    ))
+
+|#
+
+#|(define (libro-disponible? biblioteca id-libro)
+  (let ((libro (buscar-libro biblioteca "id" valor))))
+  
+  )
+|#
+;debe usar composicion de funciones
+;(define (tomar-prestamo biblioteca  id-usr id-libro dias-solicitados fecha-actual))
 
 ;pruebas
 ;---------------------------------------------------------------------------------
@@ -148,4 +267,10 @@
 (display test) (newline)
 
 
-(calcular-dias-retraso "04/01" "06/01" )
+(calcular-dias-retraso "04/01" "04/02" )
+
+(define prest (crear-prestamo 01 01 01 "01/01" 3))
+(obtener-fecha-vencimiento prest)
+
+(calcular-multa prest "07/01" 100)
+(buscar-libro b4 "autor" "jorjor")

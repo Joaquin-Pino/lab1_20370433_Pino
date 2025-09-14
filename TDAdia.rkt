@@ -90,9 +90,9 @@
 (define (total-dias->fecha dias) ;aux 
   ; se sigue la misma convencion de dias indice 0
   (let ((dias-base-cero (- dias 1)))
-    (let ((nuevo-mes (+ (quotient dias-base-cero 30) 1)))
-      (let ((nuevo-dia (+ (remainder dias-base-cero 30) 1)))
-        (crear-fecha nuevo-dia nuevo-mes)))))
+    (let ((nuevo-mes (+ (modulo (quotient dias-base-cero 30)  12) 1)) ; faltaba modulo, funcion se ropia al agregar 360 dias
+          (nuevo-dia (+ (modulo dias-base-cero 30)1)))
+      (crear-fecha nuevo-dia nuevo-mes))))
 
 ;funcion principal para suamr los dias
 (provide sumar-dias)
@@ -106,6 +106,5 @@
 
 ;----------------------------- pruebas
 (define f1 (leer-fecha "01/01"))
-(fecha->string f1)
-(fecha-valida? f1)
-(sumar-dias f1 71)
+
+(sumar-dias f1  30)
