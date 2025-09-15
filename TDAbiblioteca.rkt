@@ -159,7 +159,7 @@
 
 ;busca libro por id, autor o titoulo, devuelve null si no se encuentra
 ;dominio: biblioteca (int o string)
-;recorrido: biblioteca
+;recorrido: libro, null
 (define (buscar-libro biblio criterio valor)
   (let ((lista-libros (libros-en-biblioteca biblio)))
     (let ((resultado
@@ -207,15 +207,35 @@
     )
   )
 
-#|
-;(define (hay-atraso? usuario historial-prestamo))
-
-(define (debe-suspenderse? biblioteca id-usr fecha-actual)
-  (let ((usuario (obtener-usuario biblioteca id-usr))
-        (limite-max (obtener-limite-deuda biblioteca))))
-  ;; hacer otro let con el historial de prestamo del usuario y verificar si hay alugn atraso
+(define (hay-atraso? historial-prestamo fecha-actual) ;aux
+  (let ((prestamos-activos (filter (lambda (prestamo)
+                                     (get-estado-prestamo prestamo))
+                                   historial-prestamo)))
+    (let ((prestamos-atrasados (filter (lambda (prestamo)
+                                         (> (calcular-dias-retraso fecha-actual (obtener-fecha-vencimiento prestamo)) 0))
+                                       prestamos-activos)))
+      (if (null? prestamos-atrasados) #f #t)
+      )
+    )
   )
 
+
+(define (debe-suspenderse? biblioteca id-usr fecha-actual)
+  (let ((historial-usuario (get-prestamos-usr (obtener-usuario biblioteca id-usr)))
+
+        (let (prestamos-activos (filter (lambda (prestamo)
+                                          (eq? (get-estado-prestamo prestamo) #t)) historial-usuario))
+
+          (if (or (> (length prestamos-activos) limite-maximo) (hay-atraso? historial-usuario fecha-actual) )
+              #t
+              #f)
+          )
+    )
+  
+  ))
+
+
+#|
 (define (suspender-usuario biblioteca id-usr)
   (let ((usr (obtener-usuario biblioteca id-usr)))
     (cond
@@ -231,13 +251,50 @@
 
 |#
 
-#|(define (libro-disponible? biblioteca id-libro)
-  (let ((libro (buscar-libro biblioteca "id" valor))))
-  
+(define (libro-disponible? biblioteca id-libro)
+  (let ((libro (buscar-libro biblioteca "id" id-libro))
+        (lista-prestamos (obtener-prestamos biblioteca)))
+    (let ((lista-prestamos-libro (filter (lambda (prestamo)
+                                           (= id-libro (id-libro-prestado prestamo))) lista-prestamos)))
+      (cond
+        ((not (libro? libro)) #f)
+
+        ((null? (filter (lambda (prestamo)
+                          (eq? (get-estado-prestamo prestamo) #t)) lista-prestamos-libro)) #t)
+
+        (else #f)
+        )
+      )
+    )
   )
-|#
-;debe usar composicion de funciones
-;(define (tomar-prestamo biblioteca  id-usr id-libro dias-solicitados fecha-actual))
+
+(define (tomar-prestamo biblioteca id-usr id-libro dias-solicitados fecha-actual)
+  (let ((libro-disp (libro-disponible? biblioteca id-libro))
+        (dias-max-prestamo (obtener-max-dias-prestamo biblioteca))
+        (usuario (obtener-usuario biblioteca id-usr))
+        (limite-deuda (obtener-limite-deuda biblioteca))
+        (libros-max (obtener-max-libros biblioteca)))
+    ;se asume que usuario ingresado esta registrado en la biblioteca 
+    (let ((libros-usr (get-prestamos-usr usuario))
+          (deuda-usr (obtener-deuda usuario)) )
+
+      (if (and libro-disp (<= dias-solicitados dias-max-prestamo) (usuario-suspendido? usuario)
+               (< deuda-usr limite-deuda) (< (length libros-usr) libros-max))
+          (crear-biblioteca (libros-en-biblioteca biblioteca) (usuarios-biblioteca)
+                            ;(aca va id prestamo, tengo que ver como crearla)
+                            (obtener-max-libros biblioteca)
+                            (obtener-max-dias-prestamo biblioteca)
+                            (obtener-tasa-multa biblioteca)
+                            (obtener-limite-deuda biblioteca)
+                            (obtener-biblioteca-dias-retraso biblioteca)
+                            (get-fecha biblioteca)
+                            )
+          biblioteca
+
+
+          )
+      ))
+  )
 
 ;pruebas
 ;---------------------------------------------------------------------------------
@@ -274,3 +331,5 @@
 
 (calcular-multa prest "07/01" 100)
 (buscar-libro b4 "autor" "jorjor")
+
+(libro-disponible? b4 01)

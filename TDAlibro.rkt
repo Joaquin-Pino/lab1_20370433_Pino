@@ -28,11 +28,11 @@
 (provide get-libro-autor)
 (define (get-libro-autor libro) (obtener-dato libro 2))
 
- 
 ;-----------------------------pertenencia-----------------------------
 ; valida que dato prestenence a la estructura indicada
 ; dominio: cualquier tipo de dato
 ; recorrido: bool
+(provide libro?)
 (define (libro? libro)
   (and (number? (get-libro-id libro))
        (string? (get-libro-titulo libro))
