@@ -91,8 +91,7 @@
 ;obtiene usuario de la bibliioteca, retorna null si no se encuentra
 ;dominio: biblioteca, int
 ;recorrido: usuario, null
-(define (obtener-usuario biblioteca id)
-  ;obtener usuario RF08
+(define (obtener-usuario biblioteca id) ; RF08
   (let ((lst-usrs (usuarios-biblioteca biblioteca)))
     (define (aux lst)
       (cond
@@ -126,8 +125,7 @@
 ;registra usuario en la biblioteca, si existe usuario se entrega biblioteca sin cambios
 ;dominio: biblioteca, usuario
 ;recorrido: biblioteca
-(define (registrar-usuario biblioteca usuario)
-  ;registrar usuario RF07
+(define (registrar-usuario biblioteca usuario); RF07
   (let ((id-usr (id-usuario usuario)) 
         (lista-usuarios (usuarios-biblioteca biblioteca)))
     (if (usuario-presente? biblioteca id-usr)
@@ -200,12 +198,50 @@
 ;calcula multa por dias de atraso
 ;dominio: prestamo, str, str
 ;recorrido: int 
-(define (calcular-multa prestamo fecha-actual tasa-multa)
+(define (calcular-multa prestamo fecha-actual tasa-multa) ;RF17
   (let ((fecha-vencimiento (obtener-fecha-vencimiento prestamo)))
     (let ((dias-atraso (calcular-dias-retraso fecha-actual fecha-vencimiento)))
       (*  dias-atraso tasa-multa))
     )
   )
+
+(define (historial-usr biblioteca id-usr) ;aux
+  (let ((historial-biblioteca (obtener-prestamos biblioteca)))
+    (filter (lambda (prestamo)
+              (= (id-usuario-prestamo prestamo) id-usr)) historial-biblioteca)
+    )
+  )
+
+(define (print-prestamo prestamo) ; aux
+  (let ((estado-str (if (get-estado-prestamo prestamo) "Activo" "Completado"))
+        )
+    (string-append
+     "Préstamo #"
+     (number->string (id-prestamo prestamo))
+     " - Libro "
+     (number->string (id-libro-prestado prestamo))
+     " - Prestado: "
+     (fecha-prestamo prestamo)
+     " - Vence: "
+     (obtener-fecha-vencimiento prestamo)
+     " "
+     estado-str
+     "\n")))
+
+(define (historial-prestamos-usuario biblioteca id-usr) ;RF24
+  (let ((usuario (obtener-usuario biblioteca id-usr)))
+    (if (not usuario)
+        "" ;string vacia
+        (let ((historial-completo (obtener-prestamos biblioteca)))
+          (let ((historial-usuario (filter (lambda (prestamo)
+                                             (= (id-usuario-prestamo prestamo) id-usr))
+                                           historial-completo)))
+            
+            (if (null? historial-usuario)
+                "";string vacia
+                (map print-prestamo historial-usuario)))))))
+
+ 
 
 (define (hay-atraso? historial-prestamo fecha-actual) ;aux
   (let ((prestamos-activos (filter (lambda (prestamo)
@@ -219,20 +255,18 @@
     )
   )
 
+(define (debe-suspenderse? biblioteca id-usr fecha-actual);RF20
+  (let ((historial-usuario (historial-usr biblioteca id-usr))
+        (limite-maximo (obtener-limite-deuda biblioteca)))
+    (let ((prestamos-activos (filter (lambda (prestamo)
+                                       (eq? (get-estado-prestamo prestamo) #t)) historial-usuario)))
 
-(define (debe-suspenderse? biblioteca id-usr fecha-actual)
-  (let ((historial-usuario (get-prestamos-usr (obtener-usuario biblioteca id-usr)))
-
-        (let (prestamos-activos (filter (lambda (prestamo)
-                                          (eq? (get-estado-prestamo prestamo) #t)) historial-usuario))
-
-          (if (or (> (length prestamos-activos) limite-maximo) (hay-atraso? historial-usuario fecha-actual) )
-              #t
-              #f)
-          )
+      (if (or (> (length prestamos-activos) limite-maximo) (hay-atraso? historial-usuario fecha-actual) )
+          #t
+          #f)
+      )
     )
-  
-  ))
+  )
 
 
 #|
@@ -251,7 +285,7 @@
 
 |#
 
-(define (libro-disponible? biblioteca id-libro)
+(define (libro-disponible? biblioteca id-libro) ;RF12
   (let ((libro (buscar-libro biblioteca "id" id-libro))
         (lista-prestamos (obtener-prestamos biblioteca)))
     (let ((lista-prestamos-libro (filter (lambda (prestamo)
@@ -268,36 +302,78 @@
     )
   )
 
-(define (tomar-prestamo biblioteca id-usr id-libro dias-solicitados fecha-actual)
+(define (crear-id-prestamo biblioteca) ;aux
+  (let ((lista-prestamos (obtener-prestamos biblioteca)))
+    (if (null? lista-prestamos)
+        01
+        (let ((lista-ids (map id-prestamo lista-prestamos)))
+          (+ (apply max lista-ids) 1))))
+
+  )
+
+(define (tomar-prestamo biblioteca id-usr id-libro dias-solicitados fecha-actual) ;RF18
   (let ((libro-disp (libro-disponible? biblioteca id-libro))
         (dias-max-prestamo (obtener-max-dias-prestamo biblioteca))
         (usuario (obtener-usuario biblioteca id-usr))
         (limite-deuda (obtener-limite-deuda biblioteca))
-        (libros-max (obtener-max-libros biblioteca)))
-    ;se asume que usuario ingresado esta registrado en la biblioteca 
-    (let ((libros-usr (get-prestamos-usr usuario))
-          (deuda-usr (obtener-deuda usuario)) )
+        (libros-max (obtener-max-libros biblioteca))
+        (libros-usr (historial-usr biblioteca id-usr)))
+    ;se asume que usuario ingresado esta registrado en la biblioteca
+    (if (usuario-suspendido? usuario)
+        biblioteca
+        (let ((deuda-usr (obtener-deuda usuario)) )
 
-      (if (and libro-disp (<= dias-solicitados dias-max-prestamo) (usuario-suspendido? usuario)
-               (< deuda-usr limite-deuda) (< (length libros-usr) libros-max))
-          (crear-biblioteca (libros-en-biblioteca biblioteca) (usuarios-biblioteca)
-                            ;(aca va id prestamo, tengo que ver como crearla)
-                            (obtener-max-libros biblioteca)
-                            (obtener-max-dias-prestamo biblioteca)
-                            (obtener-tasa-multa biblioteca)
-                            (obtener-limite-deuda biblioteca)
-                            (obtener-biblioteca-dias-retraso biblioteca)
-                            (get-fecha biblioteca)
-                            )
-          biblioteca
-
-
-          )
-      ))
+          (if (and libro-disp (<= dias-solicitados dias-max-prestamo) (usuario-suspendido? usuario)
+                   (< deuda-usr limite-deuda) (< (length libros-usr) libros-max))
+              (crear-biblioteca (libros-en-biblioteca biblioteca) (usuarios-biblioteca)
+                                ;(aca va id prestamo, tengo que ver como crearla)
+                                (obtener-max-libros biblioteca)
+                                (obtener-max-dias-prestamo biblioteca)
+                                (obtener-tasa-multa biblioteca)
+                                (obtener-limite-deuda biblioteca)
+                                (obtener-biblioteca-dias-retraso biblioteca)
+                                (get-fecha biblioteca)
+                                )
+              biblioteca
+              )
+          )        
+        )
+    )
   )
 
-;pruebas
+(define (suspender-usuario biblioteca id-usr) ;rf20
+  (let ((usuario (obtener-usuario biblioteca id-usr)))
+    (if (usuario-suspendido? usuario)
+        biblioteca
+        (let ((usuario-suspendido (suspender usuario))
+              (lista-usuarios (usuarios-biblioteca biblioteca)))
+
+          (let ((nueva-lista-usuarios 
+                 (map (lambda (usuario-actual)
+                        (if (= (id-usuario usuario-actual) id-usr)
+                            usuario-suspendido
+                            usuario-actual))
+                      lista-usuarios)))
+
+            (crear-biblioteca (libros-en-biblioteca biblioteca)
+                              nueva-lista-usuarios
+                              (obtener-prestamos biblioteca)
+                              (obtener-max-libros biblioteca)
+                              (obtener-max-dias-prestamo biblioteca)
+                              (obtener-tasa-multa biblioteca)
+                              (obtener-limite-deuda biblioteca)
+                              (obtener-biblioteca-dias-retraso biblioteca)
+                              (get-fecha biblioteca))
+          ) 
+
+         
+        )
+    )
+  
+  ))
+;pruebas 
 ;---------------------------------------------------------------------------------
+
 (define biblio (crear-biblioteca null null null 2 3 100 1000 10 "01/01"))
 ;(display biblio) (newline)
 (define lib1 (crear-libro 01 "1984" "jorjor wel"))
@@ -320,16 +396,10 @@
 (define b7 (registrar-usuario b6 usr3))
 (display b7) (newline)
 
-(define test (obtener-usuario b6 01))
-(display test) (newline)
+(define prestamo1 (crear-prestamo 01 1 101 "01/09" 5))
+(define prestamo2 (crear-prestamo 02 1 103 "01/09" 3))
 
+(print-prestamo prestamo2)
+(define b8 (suspender-usuario b7 01))
 
-(calcular-dias-retraso "04/01" "04/02" )
-
-(define prest (crear-prestamo 01 01 01 "01/01" 3))
-(obtener-fecha-vencimiento prest)
-
-(calcular-multa prest "07/01" 100)
-(buscar-libro b4 "autor" "jorjor")
-
-(libro-disponible? b4 01)
+(display (obtener-usuario b8 01))

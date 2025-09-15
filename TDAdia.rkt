@@ -105,6 +105,6 @@
   (- (fecha->total-dias fecha-inicio) (fecha->total-dias fecha-fin)))
 
 ;----------------------------- pruebas
-(define f1 (leer-fecha "01/01"))
+;(define f1 (leer-fecha "01/01"))
 
-(sumar-dias f1  30)
+;(sumar-dias f1  30)

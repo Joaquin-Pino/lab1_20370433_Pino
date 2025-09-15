@@ -72,6 +72,6 @@
 
 
 ;------------------------------ pruebas
-(define p1 (crear-prestamo 01 01 01 "28/01" 5)) 
-(obtener-fecha-vencimiento p1)
+;(define p1 (crear-prestamo 01 01 01 "28/01" 5)) 
+;(obtener-fecha-vencimiento p1)
 

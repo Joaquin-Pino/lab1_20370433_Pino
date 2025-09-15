@@ -7,7 +7,7 @@
 ; dominio: int, str
 ; recorrido: ususario
 (provide crear-usuario); id , nombre, deuda, suspendido, cantidad de libros
-(define (crear-usuario id nombre) (list id nombre 0 #f '()))
+(define (crear-usuario id nombre) (list id nombre 0 #f))
 
 ;-----------------------------selectores-----------------------------
 ; obtiene id de un usuario
@@ -33,16 +33,10 @@
 (provide usuario-suspendido?)
 (define (usuario-suspendido? usuario) (obtener-dato usuario 3)) ; RF13
 
-; obtiene lista de prestamos
-; dominio: usuario
-; recorrido: lista de prestamos
-(provide get-prestamos-usr)
-(define (get-prestamos-usr usuario) (obtener-dato usuario 4)) ;RF14
-
 ;-----------------------------modificadores-----------------------------
 (provide suspender)
 (define (suspender usr)
-  (crear-usuario (id-usuario usr) (nombre-usuario usr) (obtener-deuda usr) #t (get-prestamos-usr usr)))
+  (list (id-usuario usr) (nombre-usuario usr) (obtener-deuda usr) #t))
 
 ;-----------------------------pertenencia-----------------------------
 ; determina si dato es del tipo usuario
