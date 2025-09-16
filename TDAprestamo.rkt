@@ -48,6 +48,11 @@
 (provide get-estado-prestamo)
 (define (get-estado-prestamo prestamo) (obtener-dato prestamo 5))
 
+;-----------------------------modifcador-----------------------------
+(provide cambiar-duracion-prestamo)
+(define (cambiar-duracion-prestamo prestamo duracion)
+  (crear-prestamo (id-prestamo prestamo) (id-usuario-prestamo prestamo) ((id-libro-prestado prestamo))
+                  (fecha-prestamo prestamo) duracion))
 ;-----------------------------pertenencia-----------------------------
 ; verifica si tipo de dato es de tipo de dato prestamo
 ; dominio: cualquier tipo de dato
@@ -63,6 +68,8 @@
 
 ;;----------------------------- otro ------------------------------
 ;calcula la fecha de vencimiento
+;dominio: prestamo
+; recorrido:str
 (provide obtener-fecha-vencimiento)
 (define (obtener-fecha-vencimiento prestamo)
   (let ((fecha-prest (leer-fecha (fecha-prestamo prestamo)))

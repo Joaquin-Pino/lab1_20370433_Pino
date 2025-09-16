@@ -233,15 +233,11 @@
     (if (not usuario)
         "" ;string vacia
         (let ((historial-completo (obtener-prestamos biblioteca)))
-          (let ((historial-usuario (filter (lambda (prestamo)
-                                             (= (id-usuario-prestamo prestamo) id-usr))
-                                           historial-completo)))
-            
+          (let ((historial-usuario (historial-usr biblioteca id-usr)))
             (if (null? historial-usuario)
                 "";string vacia
                 (map print-prestamo historial-usuario)))))))
 
- 
 
 (define (hay-atraso? historial-prestamo fecha-actual) ;aux
   (let ((prestamos-activos (filter (lambda (prestamo)
@@ -268,22 +264,6 @@
     )
   )
 
-
-#|
-(define (suspender-usuario biblioteca id-usr)
-  (let ((usr (obtener-usuario biblioteca id-usr)))
-    (cond
-      ((usuario? usr) (if (debe-suspenderse? biblioteca id-usr (get-fecha biblioteca))
-                          ;;crear nueva biblioteca
-                          biblioteca
-
-                          )
-                      )
-      )
-
-    ))
-
-|#
 
 (define (libro-disponible? biblioteca id-libro) ;RF12
   (let ((libro (buscar-libro biblioteca "id" id-libro))
@@ -312,35 +292,43 @@
   )
 
 (define (tomar-prestamo biblioteca id-usr id-libro dias-solicitados fecha-actual) ;RF18
-  (let ((libro-disp (libro-disponible? biblioteca id-libro))
+  ; podria mover todos estos let, menos el de usuario despues del if, pero ya funciona laksdjhfa
+  (let ((libro-disp? (libro-disponible? biblioteca id-libro))
         (dias-max-prestamo (obtener-max-dias-prestamo biblioteca))
-        (usuario (obtener-usuario biblioteca id-usr))
         (limite-deuda (obtener-limite-deuda biblioteca))
         (libros-max (obtener-max-libros biblioteca))
         (libros-usr (historial-usr biblioteca id-usr)))
     ;se asume que usuario ingresado esta registrado en la biblioteca
-    (if (usuario-suspendido? usuario)
+    (if (usuario-suspendido? (obtener-usuario biblioteca id-usr)) ;aca hay composicion
         biblioteca
-        (let ((deuda-usr (obtener-deuda usuario)) )
-
-          (if (and libro-disp (<= dias-solicitados dias-max-prestamo) (usuario-suspendido? usuario)
-                   (< deuda-usr limite-deuda) (< (length libros-usr) libros-max))
-              (crear-biblioteca (libros-en-biblioteca biblioteca) (usuarios-biblioteca)
-                                ;(aca va id prestamo, tengo que ver como crearla)
-                                (obtener-max-libros biblioteca)
-                                (obtener-max-dias-prestamo biblioteca)
-                                (obtener-tasa-multa biblioteca)
-                                (obtener-limite-deuda biblioteca)
-                                (obtener-biblioteca-dias-retraso biblioteca)
-                                (get-fecha biblioteca)
-                                )
-              biblioteca
-              )
-          )        
+        (let ((deuda-usr (obtener-deuda (obtener-usuario biblioteca id-usr)))) ;composicion 
+          (if (and libro-disp?
+                   (<= dias-solicitados dias-max-prestamo) 
+                   (not (usuario-suspendido? (obtener-usuario biblioteca id-usr))) ;composicion
+                   (< deuda-usr limite-deuda) 
+                   (< (length libros-usr) libros-max))
+              
+              (let ((id-nuevo-prestamo (crear-id-prestamo biblioteca))
+                    (lista-antigua-prestamos (obtener-prestamos biblioteca)))
+                (let ((nuevo-prestamo (crear-prestamo id-nuevo-prestamo id-usr id-libro fecha-actual dias-solicitados)))
+                  (let ((nueva-lista-prestamos (agregar-inicio-lista nuevo-prestamo lista-antigua-prestamos)))
+                    (crear-biblioteca (libros-en-biblioteca biblioteca) 
+                                      (usuarios-biblioteca biblioteca)
+                                      nueva-lista-prestamos
+                                      (obtener-max-libros biblioteca)
+                                      (obtener-max-dias-prestamo biblioteca)
+                                      (obtener-tasa-multa biblioteca)
+                                      (obtener-limite-deuda biblioteca)
+                                      (obtener-biblioteca-dias-retraso biblioteca)
+                                      (get-fecha biblioteca)))))
+              
+              
+              biblioteca)
+          )
         )
     )
   )
-
+  
 (define (suspender-usuario biblioteca id-usr) ;rf20
   (let ((usuario (obtener-usuario biblioteca id-usr)))
     (if (usuario-suspendido? usuario)
@@ -364,13 +352,48 @@
                               (obtener-limite-deuda biblioteca)
                               (obtener-biblioteca-dias-retraso biblioteca)
                               (get-fecha biblioteca))
-          ) 
+            )
+          )
+        )
+    ))
 
-         
+;obtiene prestamo por id
+(define (obtener-perstamo biblioteca id-prest) ;aux
+  (let ((lista-prestamos (obtener-prestamos biblioteca)))
+    (let ((resultado (filter (lambda (prestamo)
+                               (= id-prest (id-prestamo prestamo))) lista-prestamos)))
+    (if (null? resultado) 
+        '()
+        (car resultado)
         )
     )
-  
   ))
+
+(define renovar-prestamo ;probar
+  (lambda (biblioteca)
+    (lambda(id-prest)
+      (lambda(dias-extra fecha-actual)
+
+        (let ((prestamo (obtener-perstamo biblioteca id-prest)))
+          (if (null? prestamo)
+              biblioteca
+              (let ((estado-prestamo (get-estado-prestamo prestamo)) ; estado-prestamo: activo->#t, completado->#f
+                    (usuario (obtener-usuario biblioteca (id-usuario-prestamo prestamo)))
+                    (retraso (calcular-dias-retraso fecha-actual (obtener-fecha-vencimiento prestamo)))
+                    (excede-max? (> (+ dias-extra (duracion-prestamo prestamo)) (obtener-max-dias-prestamo biblioteca)))
+                    (lista-prestamos (obtener-prestamos biblioteca))
+                    )
+                (if (and estado-prestamo (not (usuario-suspendido? usuario)) (<= retraso 0) (not excede-max?))
+                    ;se extiende prestamo
+                    (map (lambda (p)
+                           (if (= id-prest (id-prestamo p)) ; se cambia la duracion del prestamo si hay ids iguales
+                               (cambiar-duracion-prestamo p (+ dias-extra (duracion-prestamo prestamo))) 
+                               p
+                               )) lista-prestamos)
+                    biblioteca ; no se cumplio alguna condicion y se devuelve biblioteca sin cambios
+                    )
+              )
+          ))))))
 ;pruebas 
 ;---------------------------------------------------------------------------------
 
