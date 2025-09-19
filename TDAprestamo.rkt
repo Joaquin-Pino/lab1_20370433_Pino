@@ -50,9 +50,14 @@
 
 ;-----------------------------modifcador-----------------------------
 (provide cambiar-duracion-prestamo)
-(define (cambiar-duracion-prestamo prestamo duracion)
+(define (cambiar-duracion-prestamo prestamo nueva-duracion)
   (crear-prestamo (id-prestamo prestamo) (id-usuario-prestamo prestamo) ((id-libro-prestado prestamo))
-                  (fecha-prestamo prestamo) duracion))
+                  (fecha-prestamo prestamo) nueva-duracion))
+
+(provide modificar-estado-prestamo)
+(define (modificar-estado-prestamo prestamo nuevo-estado)
+  (list (id-prestamo prestamo) (id-usuario-prestamo prestamo) (id-libro-prestado prestamo)
+        (fecha-prestamo prestamo) (duracion-prestamo prestamo) nuevo-estado))
 ;-----------------------------pertenencia-----------------------------
 ; verifica si tipo de dato es de tipo de dato prestamo
 ; dominio: cualquier tipo de dato

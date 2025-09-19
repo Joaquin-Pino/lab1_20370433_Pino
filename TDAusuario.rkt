@@ -6,7 +6,7 @@
 ; crea representacion de un usuario
 ; dominio: int, str
 ; recorrido: ususario
-(provide crear-usuario); id , nombre, deuda, suspendido, cantidad de libros
+(provide crear-usuario); id , nombre, deuda, suspendido
 (define (crear-usuario id nombre) (list id nombre 0 #f))
 
 ;-----------------------------selectores-----------------------------
@@ -36,8 +36,15 @@
 ;-----------------------------modificadores-----------------------------
 (provide suspender)
 (define (suspender usr)
-  (list (id-usuario usr) (nombre-usuario usr) (obtener-deuda usr) #t))
+  (map (lambda (campo)
+         (if (eq? campo #f)
+            #t
+            campo)
+         ) usr))
 
+(provide modificar-usuario-deuda-estado)
+(define (modificar-usuario-deuda-estado usuario nueva-deuda nuevo-estado)
+  (list (id-usuario usuario) (nombre-usuario usuario) nueva-deuda nuevo-estado))
 ;-----------------------------pertenencia-----------------------------
 ; determina si dato es del tipo usuario
 ; dominio: cualquier tipo de dato
@@ -50,3 +57,7 @@
        (boolean? (usuario-suspendido? usuario))
        (= (length usuario) 4)
        ))
+
+
+(define usr (crear-usuario 01 "asdf"))
+(suspender usr )
