@@ -124,13 +124,16 @@
 
 (display "=== CARLOS TOMA EL LIBRO DEVUELTO ===\n")
 (display "Carlos toma 'El Hobbit' (ya disponible)\n")
+(display "carlos antes del prstamo ")(display (historial-usr b13 2)) (newline)
 (define b14 (tomar-prestamo b13 2 101 3 (get-fecha b13)))
+(display "carlos despues del prestamo ")(display (historial-usr b14 2)) (newline)
 
 (display "Préstamo exitoso para Carlos\n\n")
 
 
 (display "=== JOSE PAGA TODA SU DEUDA ===\n")
 (display "Jose paga los $150 restantes\n")
+(display "deuda de jose antes de pagar: ") (display (obtener-deuda(obtener-usuario b14 1))) (newline)
 (define b15 (pagar-deuda b14 1 150))
 (define jose-libre (obtener-usuario b15 1))
 (display "Deuda: $") (display (obtener-deuda jose-libre)) (newline)
@@ -140,7 +143,9 @@
 
 (display "=== JOSE REACTIVO TOMA LIBRO ===\n")
 (display "Jose toma '1984'\n")
+(display (historial-usr b15 1)) (newline)
 (define b16 (tomar-prestamo b15 1 102 3 (get-fecha b15)))
+(display (historial-usr b16 1))(newline)
 (display "✓ Préstamo exitoso - Jose activo nuevamente\n\n")
 
 
