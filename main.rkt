@@ -88,6 +88,7 @@
 (display "=== PROCESAR DÍA ===\n")
 (define b10 (procesar-dia b9))
 (display "Fecha actual: ") (display (get-fecha b10)) (display " (05/01)\n")
+(display (obtener-deuda (obtener-usuario b10 1))) (display "----------------------")(newline)
 (display "Jose tiene 1 día de retraso - Multa: $100\n\n")
 
 
@@ -95,6 +96,8 @@
 (define b11 (procesar-dia b10))
 (display "Fecha actual: ") (display (get-fecha b11)) (display " (06/01)\n")
 (display "Jose tiene 2 días de retraso - Multa acumulada: $200\n")
+(display (obtener-deuda (obtener-usuario b11 1))) (display "acaaaaaa")(newline)
+
 (display "Jose devuelve 'El Hobbit'\n")
 (define b12 (devolver-libro b11 1 101 (get-fecha b11)))
 (define jose-deudor (obtener-usuario b12 1))
@@ -122,6 +125,7 @@
 (display "=== CARLOS TOMA EL LIBRO DEVUELTO ===\n")
 (display "Carlos toma 'El Hobbit' (ya disponible)\n")
 (define b14 (tomar-prestamo b13 2 101 3 (get-fecha b13)))
+
 (display "Préstamo exitoso para Carlos\n\n")
 
 

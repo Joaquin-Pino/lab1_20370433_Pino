@@ -400,7 +400,7 @@
 
 
 (provide devolver-libro)
-(define (devolver-libro biblioteca id-usr id-libro fecha-actual)
+(define (devolver-libro biblioteca id-usr id-libro fecha-actual) ;rf19
   (let ((prestamo (filter (lambda (p) ;obtenemos prestamo, pero esta como lista
                             (and (= (id-libro-prestado p) id-libro)
                                  (= (id-usuario-prestamo p) id-usr)
@@ -414,9 +414,10 @@
         (let ((usuario (obtener-usuario biblioteca id-usr))
               (prest (car prestamo)))
           (let ((multa (calcular-multa prest fecha-actual (obtener-tasa-multa biblioteca)))
-                (limite-deuda (obtener-limite-deuda biblioteca)))
+                (limite-deuda (obtener-limite-deuda biblioteca))
+                (historial-usuario (historial-usr biblioteca id-usr)))
             (let ((nueva-deuda (+ (obtener-deuda usuario) multa)))
-              (let ((suspender? (> nueva-deuda limite-deuda)))
+              (let ((suspender? (or (>= nueva-deuda limite-deuda) (hay-atraso? historial-usuario fecha-actual))))
                 
                 (let ((usuario-actualizado (modificar-usuario-deuda-estado usuario nueva-deuda suspender?))
                       (prestamo-actualizado (modificar-estado-prestamo prest #f)))
@@ -438,12 +439,12 @@
                                       nueva-lista-prestamos
                                       (obtener-max-libros biblioteca)
                                       (obtener-max-dias-prestamo biblioteca)
+                                      (obtener-tasa-multa biblioteca)
                                       (obtener-limite-deuda biblioteca)
                                       (obtener-biblioteca-dias-retraso biblioteca)
                                       (get-fecha biblioteca))
 
                     ))))))))) 
-
 
 
 (provide pagar-deuda)
@@ -476,7 +477,41 @@
                                 (get-fecha biblioteca))
               ))))))) 
 
+; recibe un usuario y devuelve su estado actualizado para el día siguiente.
+(define (usuario-nuevo-dia usuario biblioteca nueva-fecha-sistema) ;aux
+  (let ((id-usr (id-usuario usuario))
+        (tasa-multa (obtener-tasa-multa biblioteca))
+        (lista-prestamos (obtener-prestamos biblioteca)))
+   
+    (let ((prestamos-activos-usr (filter (lambda (p)
+                                           (and (= (id-usuario-prestamo p) id-usr)
+                                                (get-estado-prestamo p)))
+                                         lista-prestamos)))
+      (let ((lista-de-multas (map (lambda (p) (calcular-multa p nueva-fecha-sistema tasa-multa))
+                                  prestamos-activos-usr)))
+        (let ((multa-total-del-dia (apply + lista-de-multas)))
+          (let ((nueva-deuda  multa-total-del-dia))
 
+            (let ((nuevo-estado-susp (or (usuario-suspendido? usuario)
+                                         (debe-suspenderse? biblioteca id-usr nueva-fecha-sistema))))
+              
+              (modificar-usuario-deuda-estado usuario nueva-deuda nuevo-estado-susp))))))))
+
+(provide procesar-dia)
+(define (procesar-dia biblioteca)
+  (let ((nueva-fecha-sistema (fecha->string (sumar-dias (leer-fecha (get-fecha biblioteca)) 1))))
+    (let ((nueva-lista-usuarios (map (lambda (usr) ;para cada usuario en la lista, 
+                                       (usuario-nuevo-dia usr biblioteca nueva-fecha-sistema))
+                                     (usuarios-biblioteca biblioteca))))
+      (crear-biblioteca (libros-en-biblioteca biblioteca)
+                        nueva-lista-usuarios
+                        (obtener-prestamos biblioteca)
+                        (obtener-max-libros biblioteca)
+                        (obtener-max-dias-prestamo biblioteca)
+                        (obtener-tasa-multa biblioteca)
+                        (obtener-limite-deuda biblioteca)
+                        (obtener-biblioteca-dias-retraso biblioteca)
+                        nueva-fecha-sistema))))
 ;pruebas  
 ;---------------------------------------------------------------------------------
 

@@ -2,8 +2,6 @@
 
 (require "utilidades.rkt")
 
-
-
 ;;-----------------------------definicion-----------------------------
 ; crea la representacion de una fecha
 ; dominio: int, int
@@ -68,21 +66,6 @@
     (string-append (agregar-cero dia) "/" (agregar-cero mes))
     )
   )
-
-(provide fecha-valida?) ;; borrar si no lo uso
-(define (fecha-valida? fecha)
-  (let ((dia (get-dia fecha))
-        (mes (get-mes fecha)))
-    (if (and (<= dia 30) (<= mes 30))
-        #t
-        #f)))
-
-(define (dia-valido? dia) ;aux
-  (if (<= dia 30) #t #f))
-
-(define (mes-valido? dia) ;aux
-  (if (<= dia 12) #t #f))
-
 ; dias empiezan en 0 por lo que primer mes va del 0-29, segundo mes 30-59 y asi 
 (define (fecha->total-dias fecha ) ;aux
   (+ (* (- (get-mes fecha) 1) 30) (get-dia fecha)))
@@ -90,7 +73,7 @@
 (define (total-dias->fecha dias) ;aux 
   ; se sigue la misma convencion de dias indice 0
   (let ((dias-base-cero (- dias 1)))
-    (let ((nuevo-mes (+ (modulo (quotient dias-base-cero 30)  12) 1)) ; faltaba modulo, funcion se ropia al agregar 360 dias
+    (let ((nuevo-mes (+ (modulo (quotient dias-base-cero 30)  12) 1))
           (nuevo-dia (+ (modulo dias-base-cero 30)1)))
       (crear-fecha nuevo-dia nuevo-mes))))
 
