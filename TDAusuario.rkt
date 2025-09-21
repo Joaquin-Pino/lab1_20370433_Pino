@@ -14,24 +14,24 @@
 ; dominio: usuario
 ; recorrido: int
 (provide id-usuario)
-(define (id-usuario usuario) (obtener-dato usuario 0))
+(define (id-usuario usuario) (list-ref usuario 0))
 
 ; obtiene nombre de usuario
 ; domino: usuario
 ; recorrido: str
-(define (nombre-usuario usuario) (obtener-dato usuario 1))
+(define (nombre-usuario usuario) (list-ref usuario 1))
 
 ; obtiene deuda de usuario
 ; dominio: usuario
 ; recorrido: int
 (provide obtener-deuda)
-(define (obtener-deuda usuario) (obtener-dato usuario 2)) ;RF14
+(define (obtener-deuda usuario) (list-ref usuario 2)) ;RF14
 
 ; determina si un usuario esta suspendido
 ; domino: usuario
 ; recorrido: bool
 (provide usuario-suspendido?)
-(define (usuario-suspendido? usuario) (obtener-dato usuario 3)) ; RF13
+(define (usuario-suspendido? usuario) (list-ref usuario 3)) ; RF13
 
 ;-----------------------------modificadores-----------------------------
 (provide suspender)
@@ -57,7 +57,3 @@
        (boolean? (usuario-suspendido? usuario))
        (= (length usuario) 4)
        ))
-
-
-(define usr (crear-usuario 01 "asdf"))
-(suspender usr )

@@ -56,7 +56,6 @@
 ;; Caso de prueba principal
 ;; -------------------------------------------------
 
-
 (display "=== DÍA 01/01 ===\n")
 (display "Jose toma prestado 'El Hobbit' por 3 días\n")
 (define b6 (tomar-prestamo b5 1 101 3 "01/01"))
@@ -148,5 +147,10 @@
 (display (historial-usr b16 1))(newline)
 (display "✓ Préstamo exitoso - Jose activo nuevamente\n\n")
 
+(display (obtener-prestamos b16)) (newline)
 
 (display "\n===== FIN DEL SCRIPT =====\n")
+
+(display (historial-prestamos-sistema b16))
+
+

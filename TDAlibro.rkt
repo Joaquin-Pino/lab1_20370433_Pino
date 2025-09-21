@@ -14,19 +14,19 @@
 ; dominio: libro
 ; recorrido: int
 (provide get-libro-id)
-(define (get-libro-id libro) (obtener-dato libro 0))
+(define (get-libro-id libro) (list-ref libro 0))
 
 ; obtiene titulo de un libro
 ; dominio: libro
 ; recorrido: str
 (provide get-libro-titulo)
-(define (get-libro-titulo libro)  (obtener-dato libro 1))
+(define (get-libro-titulo libro)  (list-ref libro 1))
 
 ; obtiene titulo de un libro
 ; dominio: libro
 ; recorrido: str
 (provide get-libro-autor)
-(define (get-libro-autor libro) (obtener-dato libro 2))
+(define (get-libro-autor libro) (list-ref libro 2))
 
 ;-----------------------------pertenencia-----------------------------
 ; valida que dato prestenence a la estructura indicada

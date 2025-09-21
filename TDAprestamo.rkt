@@ -16,37 +16,37 @@
 ; domino: pestamo
 ; recorrido: int
 (provide id-prestamo)
-(define (id-prestamo prestamo) (obtener-dato prestamo 0))
+(define (id-prestamo prestamo) (list-ref prestamo 0))
 
 ; obtiene id de usuario que realizo el prestamo
 ; domino: pestamo
 ; recorrido: int
 (provide id-usuario-prestamo)
-(define (id-usuario-prestamo prestamo) (obtener-dato prestamo 1))
+(define (id-usuario-prestamo prestamo) (list-ref prestamo 1))
 
 ; obtiene id del libro prestado
 ; domino: pestamo
 ; recorrido: int
 (provide id-libro-prestado)
-(define (id-libro-prestado prestamo) (obtener-dato prestamo 2))
+(define (id-libro-prestado prestamo) (list-ref prestamo 2))
 
 ; obtiene fecha del prestamo
 ; domino: pestamo
 ; recorrido: fecha
 (provide fecha-prestamo)
-(define (fecha-prestamo prestamo) (obtener-dato prestamo 3))
+(define (fecha-prestamo prestamo) (list-ref prestamo 3))
 
 ; obtiene duracion del prestamo
 ; domino: pestamo
 ; recorrido: int
 (provide duracion-prestamo)
-(define (duracion-prestamo prestamo) (obtener-dato prestamo 4))
+(define (duracion-prestamo prestamo) (list-ref prestamo 4))
 
 ; obtiene estado del prestamo
 ; domino: pestamo
 ; recorrido: bool
 (provide get-estado-prestamo)
-(define (get-estado-prestamo prestamo) (obtener-dato prestamo 5))
+(define (get-estado-prestamo prestamo) (list-ref prestamo 5))
 
 ;-----------------------------modifcador-----------------------------
 (provide cambiar-duracion-prestamo)

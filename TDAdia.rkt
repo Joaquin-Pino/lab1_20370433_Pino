@@ -13,12 +13,12 @@
 ; obtiene el dia de una fecha
 ; dominio: fecha
 ; recorrido: int
-(define (get-dia fecha) (obtener-dato fecha 0))
+(define (get-dia fecha) (list-ref fecha 0))
 
 ; obtiene el mes de una fecha
 ; dominio: fecha
 ; recorrido: int
-(define (get-mes fecha) (obtener-dato fecha 1))
+(define (get-mes fecha) (list-ref fecha 1))
 
 ;;modificadores
 ; modififica el dia de una fecha

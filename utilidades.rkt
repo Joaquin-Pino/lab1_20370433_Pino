@@ -1,13 +1,6 @@
 #lang racket
 
 
-; obtiene dato de indice indicado
-; domino: lista
-; recorrido; tipo-dato
-(provide obtener-dato)
-(define (obtener-dato lista pos)
-  (list-ref lista pos))
-
 ; agrega cosas a una lista, wrapper de cons
 ; dominio: tipo-dato, lista
 ; recorrido: lista
