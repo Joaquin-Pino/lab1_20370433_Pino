@@ -1,6 +1,5 @@
 #lang racket
 
-(require "utilidades.rkt")
 
 ; -----------------------------definicion-----------------------------
 ; crea la representacion de un libro
@@ -34,8 +33,12 @@
 ; recorrido: bool
 (provide libro?)
 (define (libro? libro)
-  (and (number? (get-libro-id libro))
-       (string? (get-libro-titulo libro))
-       (string? (get-libro-autor libro))
-       (= (length libro) 3))
+  (cond
+    ((or (> (length libro) 3) (< (length libro) 3)) #f)
+    ((and (number? (get-libro-id libro))
+     (string? (get-libro-titulo libro))
+     (string? (get-libro-autor libro))) #t)
+       
+     )
   )
+    

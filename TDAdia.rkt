@@ -1,6 +1,5 @@
 #lang racket
 
-(require "utilidades.rkt")
 
 ;;-----------------------------definicion-----------------------------
 ; crea la representacion de una fecha

@@ -465,7 +465,7 @@
 (define renovar-prestamo
   (lambda (biblioteca)
     (lambda(id-prest)
-      (lambda(dias-extra)
+      (lambda (dias-extra)
         (lambda (fecha-actual)
           (let ((prestamo (obtener-prestamo biblioteca id-prest)))
             (if (null? prestamo)
@@ -532,15 +532,13 @@
 (provide historial-prestamos-usuario)
 (define (historial-prestamos-usuario biblioteca id-usr) ;RF24
   (let ((usuario (obtener-usuario biblioteca id-usr)))
-    (if (not usuario)
+    (if (null? usuario)
         "" ;string vacia  
         (let ((historial-usuario (historial-usr biblioteca id-usr))
-              (primera-linea (string-append "Historial usuario "(number->string (id-usuario usuario)) ":\n")))
+              (primera-linea (string-append "Historial usuario " (number->string (id-usuario usuario)) ":\n")))
           (if (null? historial-usuario)
               "";string vacia
-              (string-join (cons primera-linea (map print-prestamo historial-usuario)) ""))
-
-          
+              (string-join (cons primera-linea (map print-prestamo historial-usuario)) "")) 
           )
         )))
 ;entrega historial de todos los prestamos de la biblioteca
@@ -588,3 +586,36 @@
                         (obtener-limite-deuda biblioteca)
                         (obtener-max-retraso-biblioteca biblioteca)
                         nueva-fecha-sistema))))
+
+
+
+(display "--- configurando datos de prueba... ---\n")
+; libros de prueba
+(define libro1 (crear-libro 1 "el hobbit" "j.r.r. tolkien"))
+(define libro2 (crear-libro 2 "la comunidad del anillo" "j.r.r. tolkien"))
+(define libro3 (crear-libro 3 "1984" "george orwell"))
+
+; usuarios de prueba
+(define usuario1 (crear-usuario 1 "jose"))
+(define usuario2 (crear-usuario 2 "maria"))
+(define usuario3-suspendido (modificar-usuario-deuda-estado (crear-usuario 3 "pedro") 0 #t))
+(define usuario4-deudor (modificar-usuario-deuda-estado (crear-usuario 4 "ana") 1500 #f))
+
+; prestamos de prueba
+(define prestamo1 (crear-prestamo 101 1 1 "02/01" 3)) ; vence el 05/01
+(define prestamo2 (crear-prestamo 102 2 2 "03/01" 5)) ; vence el 08/01
+(define prestamo-atrasado (crear-prestamo 103 4 3 "10/01" 2)) ; vence el 12/01
+
+; bibliotecas de prueba
+(define b-vacia (crear-biblioteca '() '() '() 3 10 100 1000 5 "01/01"))
+
+(define b-con-datos
+  (crear-biblioteca
+   (list libro1 libro2 libro3)
+   (list usuario1 usuario2 usuario4-deudor)
+   (list prestamo1 prestamo2 prestamo-atrasado)
+   3 10 100 1000 5 "15/01"))
+
+
+(libro-disponible? b-vacia 01)
+(historial-prestamos-usuario b-con-datos 3)

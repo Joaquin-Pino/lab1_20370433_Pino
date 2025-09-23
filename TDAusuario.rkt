@@ -1,6 +1,5 @@
 #lang racket
 
-(require "utilidades.rkt")
 
 ;-----------------------------DEFINICION DE USUARIO-----------------------------
 ; crea representacion de un usuario

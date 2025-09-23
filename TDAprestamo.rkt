@@ -1,6 +1,5 @@
 #lang racket
 
-(require "utilidades.rkt")
 (require "TDAdia.rkt")
 
 ;-----------------------------definicion-----------------------------
