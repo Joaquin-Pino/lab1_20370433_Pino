@@ -1,6 +1,5 @@
 #lang racket
 
-(require "utilidades.rkt")
 (require "TDAlibro.rkt")
 (require "TDAusuario.rkt")
 (require "TDAdia.rkt")
@@ -8,7 +7,7 @@
 
 ; -----------------------------definicion-----------------------------
 ;crea una biblioteca
-; dominio: libro, usuario, prestamo, int, int, int, int, int, string
+;dominio: libro, usuario, prestamo, int, int, int, int, int, string
 ; recorrido: biblioteca
 (provide crear-biblioteca)
 (define (crear-biblioteca libros usuarios prestamos max-libros dias-max
@@ -18,19 +17,19 @@
 
 ;-----------------------------selectores-----------------------------
 ;obtiene libros en la biblioteca, entrega una lista
-; dominio: biblioteca
+;dominio: biblioteca
 ; recorrido: lista libros
 (provide libros-en-biblioteca)
 (define (libros-en-biblioteca biblioteca) (list-ref biblioteca 0))
 
 ;obtiene usuarios en la biblioteca, entrega lista
-; dominio: biblioteca
+;dominio: biblioteca
 ; recorrido: lista usarios
 (provide usuarios-biblioteca)
 (define (usuarios-biblioteca biblioteca) (list-ref biblioteca 1))
 
 ;obtiene prestamos (historial) en la biblioteca, entrega lista
-; dominio: biblioteca
+;dominio: biblioteca
 ; recorrido: lista prestamos
 (provide obtener-prestamos)
 (define (obtener-prestamos biblioteca) (list-ref biblioteca 2)) ;historial de prestamos
@@ -139,6 +138,11 @@
 ;recorrido: biblioteca
 (provide registrar-usuario)
 (define (registrar-usuario biblioteca usuario); RF07
+  (define (agregar-final-lista elemento lista)
+  (cond
+    ((null? lista) (agregar-inicio-lista elemento lista))
+    (else (agregar-inicio-lista (car lista) (agregar-final-lista elemento (cdr lista)))))
+    )
   (let ((id-usr (id-usuario usuario)) 
         (lista-usuarios (usuarios-biblioteca biblioteca)))
     (if (usuario-presente? biblioteca id-usr)
@@ -155,6 +159,9 @@
                             )))))
 
 ;;----------------------------- auxiliares -----------------------------
+(provide agregar-inicio-lista) 
+(define (agregar-inicio-lista cosa lista)
+  (cons cosa lista))
 
 (provide historial-usr)
 ;entrega lista con el historial de prestamos del usuario
@@ -177,8 +184,7 @@
 ;dominio: prestamo
 ;recorrido str
 (define (print-prestamo prestamo) ; aux
-  (let ((estado-str (if (get-estado-prestamo prestamo) "Activo" "Completado"))
-        )
+  (let ((estado-str (if (get-estado-prestamo prestamo) "Activo" "Completado")))
     (string-append
      "Préstamo #"
      (number->string (id-prestamo prestamo))
@@ -192,7 +198,7 @@
      estado-str
      "\n")))
 ;verifica si en lista de prestamo ingresada hay algun atraso en los prestamos activos
-;domino: lista de prestamos, string
+;dominio: lista de prestamos, string
 (define (hay-atraso? historial-prestamo fecha-actual) ;aux
   ;obtenemos lista de prestamos activos
   (let ((prestamos-activos (filter (lambda (prestamo)
@@ -217,7 +223,7 @@
   )
 
 ; obtiene prestamo por id
-;domino: biblioteca, int
+;dominio: biblioteca, int
 ;recorrido: prestamo
 (define (obtener-prestamo biblioteca id-prest) ;aux
   (let ((lista-prestamos (obtener-prestamos biblioteca)))
@@ -229,7 +235,7 @@
           ))))
 
 ; recibe un usuario y devuelve su estado actualizado para el día siguiente.
-;domino: usuario, biblioteca, str
+;dominio: usuario, biblioteca, str
 ;recorrido: usuario
 (define (usuario-nuevo-dia usuario biblioteca nueva-fecha-sistema) ;aux
   ;obtenemos datos para procesar el dia
@@ -242,8 +248,6 @@
       (let ((lista-de-multas (map (lambda (p) (calcular-multa p nueva-fecha-sistema tasa-multa))
                                   prestamos-activos-usuario)))
         (let ((nueva-deuda (apply + lista-de-multas))) ; se suman cada multa
-          
-
           (let ((nuevo-estado-susp (or (usuario-suspendido? usuario)
                                        (debe-suspenderse? biblioteca id-usr nueva-fecha-sistema))))
               
@@ -278,7 +282,7 @@
  
 
 ;calcula dias de atraso, retorna 0 si no hay atraso
-; dominio: str, str
+;dominio: str, str
 ; recorrido: int
 (provide libro-disponible?)
 (define (libro-disponible? biblioteca id-libro) ;RF12
@@ -295,7 +299,7 @@
         (else #f)
         ))))
 ;calcula la dias de atraso a partir de fecha actual y al fecha de vencimiento de un prestamo
-;domino: str, str
+;dominio: str, str
 ;recorrido: int
 (provide calcular-dias-retraso)
 (define (calcular-dias-retraso fecha-actual fecha-vencimiento);rf16
@@ -322,7 +326,6 @@
 ;recorrido: biblioteca
 (provide tomar-prestamo)
 (define (tomar-prestamo biblioteca id-usr id-libro dias-solicitados fecha-actual) ;RF18
-  ; podria mover todos estos let, menos el de usuario despues del if, pero ya funciona laksdjhfa
   (let ((libro-disp? (libro-disponible? biblioteca id-libro))
         (dias-max-prestamo (obtener-max-dias-prestamo biblioteca))
         (limite-deuda (obtener-limite-deuda biblioteca))
@@ -354,11 +357,11 @@
                                       (obtener-limite-deuda biblioteca)
                                       (obtener-max-retraso-biblioteca biblioteca)
                                       (get-fecha biblioteca)))))
-              biblioteca) ; fallo una verificacion, se devuelve biblioteca sin cambios
+              biblioteca) ; fallo en alguna verificacion, se devuelve biblioteca sin cambios
           ))))
 
 ;se devuelve libro a biblioteca
-;domino: biblioteca, int, int, str
+;dominio: biblioteca, int, int, str
 ;recorrido: biblioteca
 (provide devolver-libro)
 (define (devolver-libro biblioteca id-usr id-libro fecha-actual) ;rf19
@@ -367,13 +370,11 @@
                                  (= (id-usuario-prestamo p) id-usr)
                                  (get-estado-prestamo p)))
                           (obtener-prestamos biblioteca))))
-    
     (if (null? prestamo)
         biblioteca ; si no se encuentra prestamo, se devuelve la biblioteca sin cambios
-
         ; let se usa para manejar todo lo necesario con el prestamo
         (let ((usuario (obtener-usuario biblioteca id-usr))
-              (prest (car prestamo)))
+              (prest (car prestamo))); para poder utilizar el prestamo
           (let ((multa (calcular-multa prest fecha-actual (obtener-tasa-multa biblioteca)))
                 (limite-deuda (obtener-limite-deuda biblioteca))
                 (historial-usuario (historial-usr biblioteca id-usr)))
@@ -393,7 +394,6 @@
                                                           prestamo-actualizado
                                                           p))
                                                     (obtener-prestamos biblioteca))))
-
                     ; se devuleve biblioteca actualizada
                     (crear-biblioteca (libros-en-biblioteca biblioteca)
                                       nueva-lista-usuarios
@@ -404,11 +404,10 @@
                                       (obtener-limite-deuda biblioteca)
                                       (obtener-max-retraso-biblioteca biblioteca)
                                       (get-fecha biblioteca))
-
                     ))))))))) 
 
 ;funcion que decide si usuario debe suspenderese por retraso excesivo o por superar limite de deuda
-;domino: biblioteca, int, str
+;dominio: biblioteca, int, str
 ;recorrido: bool
 (provide debe-suspenderse?)
 (define (debe-suspenderse? biblioteca id-usr fecha-actual);RF20
@@ -419,7 +418,6 @@
                  max-retraso)) prestamos-act)
     
     )
-  
   (let ((historial-activo-usuario (prestamos-activos-usr biblioteca id-usr))
         (limite-maximo (obtener-limite-deuda biblioteca))
         (atraso-max (obtener-max-retraso-biblioteca biblioteca))
@@ -432,7 +430,7 @@
     ))
 
 ;suspende manualmente al usuario en la biblioteca
-;domino: biblioteca, int
+;dominio: biblioteca, int
 ;recorrido: biblioteca
 (provide suspender-usuario)
 (define (suspender-usuario biblioteca id-usr) ;rf21
@@ -462,7 +460,7 @@
             )))))
 
 ;funcion currificada que permite renovar prestamo por n dias mas, siempre y cuando no suspere el maximo de dias de prestamo
-;domino: biblioteca, int, int, str
+;dominio: biblioteca, int, int, str
 (provide renovar-prestamo);rf22
 (define renovar-prestamo
   (lambda (biblioteca)
@@ -502,12 +500,10 @@
     (define (atraso-excesivo prestamos-act max-retraso)
       (filter (lambda (p)
                 (> (calcular-dias-retraso fecha-actual (obtener-fecha-vencimiento p))
-                   max-retraso)) prestamos-act)
-    
-      )
+                   max-retraso)) prestamos-act))
     (let ((deuda-usr (obtener-deuda usuario))
           (retraso? (if (null? (atraso-excesivo historial-activo-usuario max-retraso)) #f #t )))
-
+      
       ;si paga toda su deuda, deduda=0 si no, deuda = diferencia entre deuda y lo pagado
       (let ((nueva-deuda (if (< (- deuda-usr monto) 0) 0 (- deuda-usr monto)))) 
         ;si paga deuda y no hay retraso estado del usuario para a ser #f (no suspendido)
@@ -531,7 +527,7 @@
                                 (get-fecha biblioteca))
               )))))))
 ;entrega hisotrial de prestamos de un usuario en formato str, si no hay usr o no tiene prestamos, se entrega str vacia
-;domino: biblioteca, int
+;dominio: biblioteca, int
 ;recorrido: str
 (provide historial-prestamos-usuario)
 (define (historial-prestamos-usuario biblioteca id-usr) ;RF24
@@ -547,8 +543,8 @@
           
           )
         )))
-;entrega hisotorial de todos los prestamos de la biblioteca
-;domino: biblioteca
+;entrega historial de todos los prestamos de la biblioteca
+;dominio: biblioteca
 ;recorrido: str
 (provide historial-prestamos-sistema)
 (define (historial-prestamos-sistema bibliotca)
@@ -575,7 +571,7 @@
   )
 
 ;se suma un dia a la fecha actual de la bilioteca y se procesan multas
-;Domino: biblioteca
+;dominio: biblioteca
 ;recorrido: bilbioteca
 (provide procesar-dia);rf26
 (define (procesar-dia biblioteca)

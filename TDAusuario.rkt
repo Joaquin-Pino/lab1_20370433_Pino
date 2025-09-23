@@ -34,6 +34,9 @@
 (define (usuario-suspendido? usuario) (list-ref usuario 3)) ; RF13
 
 ;-----------------------------modificadores-----------------------------
+;cambia estado del usauario a suspendido
+;domino: usuario
+;recorrido: usuario
 (provide suspender)
 (define (suspender usr)
   (map (lambda (campo)
@@ -42,6 +45,9 @@
             campo)
          ) usr))
 
+;modifica la deuda y el estado de un usuario
+;domino: usuario, int, bool
+;recorrido: usuario
 (provide modificar-usuario-deuda-estado)
 (define (modificar-usuario-deuda-estado usuario nueva-deuda nuevo-estado)
   (list (id-usuario usuario) (nombre-usuario usuario) nueva-deuda nuevo-estado))

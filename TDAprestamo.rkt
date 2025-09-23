@@ -49,11 +49,17 @@
 (define (get-estado-prestamo prestamo) (list-ref prestamo 5))
 
 ;-----------------------------modifcador-----------------------------
+;cambia duracion del prestamo a la nueva duracion indicada
+;domino: prestamo, int
+;recorrido: prestamo
 (provide cambiar-duracion-prestamo)
 (define (cambiar-duracion-prestamo prestamo nueva-duracion)
   (crear-prestamo (id-prestamo prestamo) (id-usuario-prestamo prestamo) ((id-libro-prestado prestamo))
                   (fecha-prestamo prestamo) nueva-duracion))
 
+;modifica el estado de un prestamo, al estado indicado
+;domino: prestamo, bool
+;recorrido: prestamo
 (provide modificar-estado-prestamo)
 (define (modificar-estado-prestamo prestamo nuevo-estado)
   (list (id-prestamo prestamo) (id-usuario-prestamo prestamo) (id-libro-prestado prestamo)
@@ -81,9 +87,4 @@
         (dias-prestado (duracion-prestamo prestamo)))
     (fecha->string(sumar-dias fecha-prest dias-prestado))
     ))
-
-
-;------------------------------ pruebas
-;(define p1 (crear-prestamo 01 01 01 "28/01" 5)) 
-;(obtener-fecha-vencimiento p1)
 
