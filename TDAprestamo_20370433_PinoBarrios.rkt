@@ -1,6 +1,6 @@
 #lang racket
 
-(require "TDAdia.rkt")
+(require "TDAdia_20370433_PinoBarrios.rkt")
 
 ;-----------------------------definicion-----------------------------
 ; crea tipo de dato prestamo
@@ -53,7 +53,7 @@
 ;recorrido: prestamo
 (provide cambiar-duracion-prestamo)
 (define (cambiar-duracion-prestamo prestamo nueva-duracion)
-  (crear-prestamo (id-prestamo prestamo) (id-usuario-prestamo prestamo) ((id-libro-prestado prestamo))
+  (crear-prestamo (id-prestamo prestamo) (id-usuario-prestamo prestamo) (id-libro-prestado prestamo)
                   (fecha-prestamo prestamo) nueva-duracion))
 
 ;modifica el estado de un prestamo, al estado indicado
@@ -74,7 +74,6 @@
        (string? (fecha-prestamo p))
        (number? (duracion-prestamo p))
        (= (length p) 5)))
-
 
 ;;----------------------------- otro ------------------------------
 ;calcula la fecha de vencimiento
